@@ -1,0 +1,12 @@
+{
+  "name": "fake-html",
+  "version": "0.0.1",
+  "description": "To create fake HTML content for a given size",
+  "main": "index.js",
+  "author": "pragatheeswarans",
+  "license": "MIT",
+  "dependencies": {
+    "faker": "^4.1.0",
+    "node-blob": "^0.0.2"
+  }
+}
