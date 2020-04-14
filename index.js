@@ -1,6 +1,7 @@
 const faker = require('faker');
 const Blob = require('node-blob');
-const htmlTags = [
+const fs = require('fs');
+const htmlTagsForTextContent = [
   'h1',
   'h2',
   'h3',
@@ -10,22 +11,36 @@ const htmlTags = [
   'div',
   'span',
   'p',
+  'b',
   'strong'
 ];
-const textOptions = [
+const textGenerators = [
+  'word',
+  'words',
+  'sentence',
   'sentences',
+  'paragraph',
   'paragraphs',
+  'text',
   'lines'
 ];
 
-module.exports = function(obj) {
+module.exports = function(config) {
+  this.includeHeader = config.includeHeader || false;
+  this.includeFooter = config.includeFooter || false;
+  this.createFile = config.createFile || false;
+  this.outputFilePath = config.filePath || 'fake-html.html';
+
   let html = createFakeHTML();
-  console.log(`Created HTML content of size ${new Blob([html]).size / (1024 * 1024)} MB`);
+  printOutputFileSize(html);
+  if (this.createFile) {
+    return writeOutputToFile(html);
+  }
   return html;
 };
 
-function createFakeHTML(config) {
-  return `${createHTMLHeader()} ${createHTMLBody()} ${createHTMLFooter()}`;
+function createFakeHTML() {
+  return `${this.includeHeader ? createHTMLHeader() : ''} ${createHTMLBody()} ${this.includeFooter ? createHTMLFooter() : ''}`;
 }
 
 function createHTMLHeader() {
@@ -55,7 +70,7 @@ function createHTMLFooter() {
 }
 
 function getRandomTag() {
-  return `<${htmlTags[faker.random.number({ min: 0, max: htmlTags.length - 1 })]}>`;
+  return `<${htmlTagsForTextContent[faker.random.number({ min: 0, max: htmlTagsForTextContent.length - 1 })]}>`;
 }
 
 function getEndTag(tag) {
@@ -63,6 +78,19 @@ function getEndTag(tag) {
 }
 
 function getRandomContent() {
-  let option = textOptions[faker.random.number({ min: 0, max: textOptions.length - 1 })];
-  return faker.lorem[option]();
+  let textGenerator = textGenerators[faker.random.number({ min: 0, max: textGenerators.length - 1 })];
+  return faker.lorem[textGenerator]();
+}
+
+function printOutputFileSize(htmlContent) {
+  const fileSizeInMB = (new Blob([htmlContent]).size / (1024 * 1024)).toFixed(2);
+  console.log(`Created HTML content of size ${fileSizeInMB} MB`);
+}
+
+function writeOutputToFile(htmlContent) {
+  fs.writeFile(this.outputFilePath, htmlContent, 'utf8', (err) => {
+    if (err)
+      return console.log(`Unable to write the output to the file due to ${err}`);
+    console.log(`HTML output written successfully to ${this.outputFilePath}`);
+  });
 }

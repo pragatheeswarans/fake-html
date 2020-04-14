@@ -1,2 +1,2 @@
-const FAKE_HTML = require('../');
-console.log(FAKE_HTML('hello world'));
+const fakeHtml = require('../');
+const output = fakeHtml({ createFile: true });
